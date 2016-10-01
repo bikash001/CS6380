@@ -1,5 +1,7 @@
 *.out
+*.o
 euc_*
+*.zip
 noneuc_*
 temp.*
 tsp

@@ -13,7 +13,7 @@ void geneticAlgo(vector<vector<double>> &Table){
 	vector<vector<int>> population;
 	int population_size = 10;
 	int i,j;
-	int k = 1, count = 0;
+	int k = 10, count = 0;
 	while(count < k)
 	{
 		for(i=0;i<population_size;i++){
@@ -24,34 +24,28 @@ void geneticAlgo(vector<vector<double>> &Table){
 			genPath(v);
 			population.push_back(v);
 		}
-		// cout << "HHAHA" << endl << flush;
 
 		selection(population, Table);
 
-		// cout << "HHAHA22" << endl << flush;
-
 		random_device gen;
 		shuffle(population.begin(), population.end(), gen);
-		// cout << "HHAHA344" << endl << flush;
 		int cc = 0;
 		for(i=0;i<population_size/2;i++){
-			cout << cc++ << endl << flush;
 			crossOver(population[i], population[population_size - i - 1]);
 		}
 
-		cout << "HHAHA33" << endl << flush;
 
 		int max = 0;
 		int max_index, val;
 		for(i=0;i<population_size;i++){
 			val = evaluate(population[i], Table);
 			if(val>max){
-				max = 0;
+				max = val;
 				max_index = i;
 			}
 		}
-		// cout << "HHAHA44" << endl << flush;
-		printPath(population[max_index]);
+		// printPath(population[max_index]);
+		cout << max << endl;
 		count++;
 	}
 }
@@ -111,6 +105,5 @@ int main(int argc, char* argv[]){
 
 	vector<vector<double>> Table;
 	readInput(argv[1], Table);
-	// printTable(Table);
 	geneticAlgo(Table);
 }
