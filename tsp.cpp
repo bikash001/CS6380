@@ -16,7 +16,7 @@ void printPath(vector<int> &A)
 	for (int &x: A) {
 		cout << x << " ";
 	}
-	cout << endl;
+	cout << endl << flush;
 }
 
 static bool contains(vector<int>::iterator begin, vector<int>::iterator end, int k) {
@@ -53,10 +53,12 @@ void crossOver(vector<int> &A, vector<int> &B)
 		if (low > high) {
 			swap(low, high);
 		}
+		cout << "HHAHA34545" << endl << flush;
 	} while (low == 0 && high == size);
 	vector<int> a(A);
 	vector<int> b(B);
 	copy(A, low, high);
+	cout << "HHAHA1221" << endl << flush;
 	copy(B, low, high);
 	vector<int>::iterator aitr, bitr, abegin, bbegin, aend, bend;
 	abegin = a.begin()+low;
@@ -92,12 +94,13 @@ static int sumTotal(int* arr, int size) {
 	return total;
 }
 
-static int evaluate(vector<int> &A, vector<vector<double>> &Table) {
+int evaluate(vector<int> &A, vector<vector<double>> &Table) {
 	double total = 0;
 	int size = A.size();
 	for (int i=1; i<size; ++i) {
 		total += Table[A[i-1]][A[i]];
 	}
+	// cout << "HHAHAgoogog" << endl << flush;
 	total += Table[A[size-1]][0];
 	return ceil(total);
 }
@@ -125,6 +128,7 @@ void selection(vector<vector<int>> &A, vector<vector<double>> &Table) {
 	for (int i=0; i<size; ++i) {
 		vals[i] = evaluate(A[i], Table);
 	}
+	// cout << "HHAHAsgdfg" << endl << flush;
 	for (int i=1; i<size; ++i) {
 		vals[i] += vals[i-1];
 	}
@@ -132,6 +136,7 @@ void selection(vector<vector<int>> &A, vector<vector<double>> &Table) {
 	random_device gen;
 	uniform_int_distribution<int> dist(0,total);
 	int index = 0;
+	// cout << "HHAHAoooooo" << endl << flush;
 	vector<vector<int>> parCopy(A);
 	for (int i=0; i<size; ++i) {
 		index = getIndex(vals, dist(gen));
