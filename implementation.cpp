@@ -1,6 +1,9 @@
 #include "header.hpp"
 #include <random>
 #include <algorithm>
+#include <climits>
+
+int g_min = INT_MAX;
 
 void geneticAlgo(vector<vector<double>> &Table){
 	/*
@@ -13,7 +16,7 @@ void geneticAlgo(vector<vector<double>> &Table){
 	vector<vector<int>> population;
 	int population_size = 10;
 	int i,j;
-	int k = 10, count = 0;
+	int k = 1000, count = 0;
 	while(count < k)
 	{
 		for(i=0;i<population_size;i++){
@@ -35,19 +38,20 @@ void geneticAlgo(vector<vector<double>> &Table){
 		}
 
 
-		int max = 0;
+		int max = INT_MAX;
 		int max_index, val;
 		for(i=0;i<population_size;i++){
 			val = evaluate(population[i], Table);
-			if(val>max){
-				max = val;
+			if(val < g_min){
+				g_min = val;
 				max_index = i;
 			}
 		}
 		// printPath(population[max_index]);
-		cout << max << endl;
+		// cout << max << endl;
 		count++;
 	}
+	cout << g_min << endl;
 }
 
 void readInput(char* filename, vector<vector<double>>& Table){

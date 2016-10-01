@@ -122,11 +122,17 @@ static int getIndex(vector<int> &vals, int k) {
 void selection(vector<vector<int>> &A, vector<vector<double>> &Table) {
 	int size = A.size();
 	vector<int> vals(size);
+	int max = 0;
 	for (int i=0; i<size; ++i) {
 		vals[i] = evaluate(A[i], Table);
+		if (vals[i] > max) {
+			max = vals[i];
+		}
 	}
+	max += 10;
+	vals[0] = max - vals[0];
 	for (int i=1; i<size; ++i) {
-		vals[i] += vals[i-1];
+		vals[i] = max - vals[0] + vals[i-1];
 	}
 	int total = vals[size-1];
 	random_device gen;
