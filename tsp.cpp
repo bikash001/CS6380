@@ -19,7 +19,7 @@ void printPath(vector<int> &A)
 	cout << endl;
 }
 
-bool contains(vector<int>::iterator begin, vector<int>::iterator end, int k) {
+static bool contains(vector<int>::iterator begin, vector<int>::iterator end, int k) {
 	while (begin <= end) {
 		if (*begin == k) {
 			return true;
@@ -29,15 +29,7 @@ bool contains(vector<int>::iterator begin, vector<int>::iterator end, int k) {
 	return false;
 }
 
-void copy(vector<int>::iterator &dst, vector<int>::iterator &src, vector<int>::iterator end) {
-	while (src <= end) {
-		*dst = *src;
-		++dst;
-		++src;
-	}
-}
-
-void copy(vector<int> &A, int low, int high) {
+static void copy(vector<int> &A, int low, int high) {
 	std::vector<int>::iterator dst = A.begin();
 	while (low <= high) {
 		*dst = A[low];
@@ -51,8 +43,8 @@ void crossOver(vector<int> &A, vector<int> &B)
 	random_device gen;
 	int low, high;
 	int size = A.size() - 1;
+	uniform_int_distribution<int> dist(0,size);
 	do {
-		uniform_int_distribution<int> dist(0,size);
 		low = dist(gen);
 		high = dist(gen);
 		while (low == high) {
@@ -91,28 +83,58 @@ void crossOver(vector<int> &A, vector<int> &B)
 	}
 }
 
-double evaluate(vector<int> &A, vector<vector<double>> &Table) {
+static int sumTotal(int* arr, int size) {
+	int total = 0;
+	for (int i=0; i<size; ++i) {
+		total += *arr;
+		++arr;
+	}
+	return total;
+}
+
+static int evaluate(vector<int> &A, vector<vector<double>> &Table) {
 	double total = 0;
 	int size = A.size();
 	for (int i=1; i<size; ++i) {
 		total += Table[A[i-1]][A[i]];
 	}
 	total += Table[A[size-1]][0];
-	return total;
+	return ceil(total);
+}
+
+static int getIndex(vector<int> &vals, int k) {
+	int lt = 0;
+	int rt = vals.size()-1;
+	int mid;
+	while (lt < rt) {
+		mid = (lt+rt)/2;
+		if (vals[mid] == k) {
+			return mid;
+		} else if (vals[mid] < k) {
+			lt = mid+1;
+		} else {
+			rt = mid;
+		}
+	}
+	return rt;
 }
 
 void selection(vector<vector<int>> &A, vector<vector<double>> &Table) {
 	int size = A.size();
-	double vals[size];
+	vector<int> vals(size);
 	for (int i=0; i<size; ++i) {
 		vals[i] = evaluate(A[i], Table);
 	}
-	double max = max_element(vals, vals+size);
-}
-
-int main()
-{
-	vector<int> foo {1,2,3,4,5};
-	genPath(foo);
-	printPath(foo);
+	for (int i=1; i<size; ++i) {
+		vals[i] += vals[i-1];
+	}
+	int total = vals[size-1];
+	random_device gen;
+	uniform_int_distribution<int> dist(0,total);
+	int index = 0;
+	vector<vector<int>> parCopy(A);
+	for (int i=0; i<size; ++i) {
+		index = getIndex(vals, dist(gen));
+		A[i] = parCopy[index];
+	}
 }
