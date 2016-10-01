@@ -1,0 +1,4 @@
+*.out
+euc_*
+noneuc_*
+temp.*
