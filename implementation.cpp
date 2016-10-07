@@ -2,8 +2,59 @@
 #include <random>
 #include <algorithm>
 #include <climits>
+#include <queue>
+
+struct prObj{
+	int index;
+	double val;
+};
+
+struct LessThan{
+	bool operator()(const prObj &lhs, prObj &rhs) const {
+		return lhs.val < rhs.val;
+	}  
+};
+
+struct GreaterThan{
+	bool operator()(const prObj &lhs, prObj &rhs) const {
+		return lhs.val > rhs.val;
+	}  
+};
+
+bool lessThan(const prObj &lhs, const prObj &rhs)
+{
+	return lhs.val < rhs.val;
+}
+bool greaterThan(const prObj &lhs, const prObj &rhs)
+{
+	return lhs.val > rhs.val;
+}
 
 int g_min = INT_MAX;
+
+void sum(std::vector<int> v) {
+	int total = 0;
+	int size = v.size();
+	int arr[size];
+	for (int &x : arr) {
+		x = 0;
+	}
+	for (int i=0; i<size; ++i) {
+		total += v[i];
+		arr[v[i]] = 1;
+	}
+	if (total != 4950) {
+		cout << "error "<< total << " size " << size << endl;
+		for (int i=0; i < size ; ++i) {
+			if (arr[i] == 0) 
+				cout << i+1 << " ";
+		}
+		cout << endl;
+	} else {
+		// cout << "success" << endl;
+	}
+	// cout << total << endl;
+}
 
 void geneticAlgo(vector<vector<double>> &Table){
 	/*
@@ -13,45 +64,72 @@ void geneticAlgo(vector<vector<double>> &Table){
 		Collect population of children. Print best if better than the previous best.
 	*/
 	int n = Table.size();
+
 	vector<vector<int>> population;
-	int population_size = 10;
+	int population_size = 200;
+	int parent_retain = 50;
 	int i,j;
-	int k = 1000, count = 0;
-	while(count < k)
+	int k = 1, count = 0;
+	for(i=0;i<population_size;i++){
+		vector<int> v(n);
+		greedy(v,Table);
+		population.push_back(v);
+	}
+	// cout << "---------------------------------------" << endl;
+	int csize = population_size/2;
+	vector<struct prObj> par(n);
+	vector<struct prObj> child(n);
+	random_device gen;
+	while(true)
 	{
-		for(i=0;i<population_size;i++){
-			vector<int> v;
-			for(j=0;j<n;j++){
-				v.push_back(j);	
-			}
-			genPath(v);
-			population.push_back(v);
-		}
-
 		selection(population, Table);
-
-		random_device gen;
+		// for (int i=0; i<population.size(); ++i) {
+		// 	cout << evaluate(population[i], Table) << endl;
+		// }
+		vector<vector<int>> tempPop(population);
 		shuffle(population.begin(), population.end(), gen);
-		int cc = 0;
-		for(i=0;i<population_size/2;i++){
+		for(i=0; i<csize; i++){
 			crossOver(population[i], population[population_size - i - 1]);
 		}
+		int max_index;
+		double val1, val2, min;
+		min = numeric_limits<double>::infinity();
 
-
-		int max = INT_MAX;
-		int max_index, val;
 		for(i=0;i<population_size;i++){
-			val = evaluate(population[i], Table);
-			if(val < g_min){
-				g_min = val;
+			val1 = evaluate(population[i], Table);
+			child[i].index = i;
+			child[i].val = val1;
+			val2 = evaluate(tempPop[i], Table);
+			par[i].index = i;
+			par[i].val = val2;
+			if (val1 > val2) {
+				val1 = val2;
+			}
+			if(val1 < g_min){
+				g_min = val1;
 				max_index = i;
+				cout << val1 << endl;
+				// printPath(population[i]);
 			}
 		}
-		// printPath(population[max_index]);
-		// cout << max << endl;
-		count++;
+		sort(par.begin(), par.end(), lessThan);
+		// for (int i=1; i<par.size(); ++i) {
+		// 	if (par[i-1].val > par[i].val) {
+		// 		cout << "error one" << endl;
+		// 	}
+		// }
+		sort(child.begin(), child.end(), greaterThan);
+		// for (int i=1; i<child.size(); ++i) {
+		// 	if (child[i-1].val < child[i].val) {
+		// 		cout << "error two" << endl;
+		// 	}
+		// }
+		for (int i=0; i<parent_retain; ++i) {
+			population[child[i].index] = tempPop[par[i].index];
+		}
+		// count++;
 	}
-	cout << g_min << endl;
+	// cout << "final " << g_min << endl;
 }
 
 void readInput(char* filename, vector<vector<double>>& Table){
@@ -109,5 +187,15 @@ int main(int argc, char* argv[]){
 
 	vector<vector<double>> Table;
 	readInput(argv[1], Table);
+	// vector<int> b(100);
+	// double temp;
+	// double min = numeric_limits<double>::infinity();
+	// for (int i=0; i<100; ++i) {
+	// 	temp = greedy(b, Table);
+	// 	if (temp < min) {
+	// 		min = temp;
+	// 	}
+	// }
+	// cout << min << endl;
 	geneticAlgo(Table);
 }

@@ -1,7 +1,7 @@
 CC = g++
 CFLAGS = -std=c++11
-all: tsp.o implementation.o
-	$(CC) -o tsp tsp.o implementation.o
+all: tsp.o implementation.o greedy.o
+	$(CC) -o tsp tsp.o implementation.o greedy.o
 
 tsp.o: tsp.cpp
 	$(CC) $(CFLAGS) -c tsp.cpp
@@ -9,5 +9,8 @@ tsp.o: tsp.cpp
 implementation.o: implementation.cpp header.hpp
 	$(CC) $(CFLAGS) -c implementation.cpp
 
-clear:
+greedy.o: greedy.cpp
+	$(CC) $(CFLAGS) -c greedy.cpp
+
+clean:
 	rm tsp *.o

@@ -5,10 +5,13 @@
 #include <vector>
 using namespace std;
 
-void genPath(vector<int> &A);
-void printPath(vector<int> &A);
-void crossOver(vector<int> &A, vector<int> &B);
-void selection(vector<vector<int> > &A, vector<vector<double> > &Table);
-int evaluate(vector<int> &A, vector<vector<double>> &Table);
+void mutation(vector<vector<int> > &);
+void genPath(vector<int> &);
+void printPath(vector<int> &);
+void crossOver(vector<int> &, vector<int> &);
+void selection(vector<vector<int> > &, vector<vector<double> > &);
+double evaluate(vector<int> &, vector<vector<double> > &);
+double greedy(vector<int> &, vector<vector<double> > &);
+void sum(std::vector<int> v);
 
 #endif
