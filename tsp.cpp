@@ -6,17 +6,22 @@
 #include "header.hpp"
 using namespace std;
 
-void mutation(vector<vector<int>> &A) {
+void mutation(vector<vector<int> *> &A) {
 	random_device gen;
-	uniform_int_distribution<int> dist(0,A[0].size());
-	int low, high;
-	int size = A.size();
-	for (int i=0; i<size; ++i) {
-		do{
-			low = dist(gen);
-			high = dist(gen);
-		} while (low == high);
-		swap(A[i][low], A[i][high]);
+	double prob = 0.0005;
+	uniform_real_distribution<double> pp(0,1);
+	double rs = pp(gen);
+	if (rs <= prob) {
+		uniform_int_distribution<int> dist(0,(*A[0]).size()-1);
+		int low, high;
+		int size = A.size();
+		for (int i=0; i<size; ++i) {
+			do{
+				low = dist(gen);
+				high = dist(gen);
+			} while (low == high);
+			swap((*A[i])[low], (*A[i])[high]);
+		}
 	}
 }
 
@@ -64,7 +69,6 @@ static void copy(vector<int> &A, int low, int high) {
 
 void crossOver(vector<int> &A, vector<int> &B)
 {
-
 	random_device gen;
 	int low, high;
 	int size = A.size() - 1;
@@ -83,12 +87,7 @@ void crossOver(vector<int> &A, vector<int> &B)
 	vector<int> b(B);
 	copy(A, low, high);
 	copy(B, low, high);
-	vector<int>::iterator aitr, bitr, abegin, bbegin, aend, bend;
-	abegin = a.begin()+low;
-	aend = a.begin() + high;
-
-	// bbegin = b.begin() + low;
-	// bend = b.begin() + high;
+	vector<int>::iterator aitr, bitr;
 	aitr = A.begin()+high-low;
 	bitr = B.begin()+high-low;
 	for (int k=0; k <= size; ++k) {
@@ -110,13 +109,13 @@ static int sumTotal(int* arr, int size) {
 	return total;
 }
 
-double evaluate(vector<int> &A, vector<vector<double>> &Table) {
+double evaluate(vector<int> &A, vector<vector<double>*> &Table) {
 	double total = 0;
 	int size = A.size();
 	for (int i=1; i<size; ++i) {
-		total += Table[A[i-1]][A[i]];
+		total += (*Table[A[i-1]])[A[i]];
 	}
-	total += Table[A[size-1]][A[0]];
+	total += (*Table[A[size-1]])[A[0]];
 	return total;
 }
 
@@ -137,21 +136,33 @@ static int getIndex(vector<double> &vals, double k) {
 	return rt;
 }
 
-void selection(vector<vector<int>> &A, vector<vector<double>> &Table) {
+static void make_pops(vector<vector<int>*> &dest, vector<vector<int>*> &src)
+{
+	int size = src.size();
+	for (int i=0; i<size; ++i)
+	{
+		dest[i] = new vector<int>(*src[i]);
+	}
+}
+
+
+void selection(vector<vector<int> *> &A, vector<vector<double> *> &Table) {
 	int size = A.size();
 	vector<double> vals(size);
 	int max = 0;
-	vals[0] = 1 / evaluate(A[0], Table);
+	vals[0] = 1 / evaluate(*A[0], Table);
 	for (int i=1; i<size; ++i) {
-		vals[i] = vals[i-1] + 1 / evaluate(A[i], Table);
+		vals[i] = vals[i-1] + 1 / evaluate(*A[i], Table);
 	}
 	double total = vals[size-1];
 	random_device gen;
 	uniform_real_distribution<double> dist(0,total);
 	int index = 0;
-	vector<vector<int>> parCopy(A);
+	vector<vector<int> *> parCopy(size);
+	make_pops(parCopy, A);
 	for (int i=0; i<size; ++i) {
 		index = getIndex(vals, dist(gen));
-		A[i] = parCopy[index];
+		*A[i] = *parCopy[index];
 	}
+	free_pops(parCopy);
 }

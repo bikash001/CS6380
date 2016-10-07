@@ -4,7 +4,7 @@
 #include <iostream>
 using namespace std;
 
-double greedy(vector<int> &path, vector<vector<double>> &table)
+double greedy(vector<int> &path, vector<vector<double>*> &table)
 {
 	double total = 0.0;
 	int size = path.size();
@@ -23,16 +23,16 @@ double greedy(vector<int> &path, vector<vector<double>> &table)
 		min = numeric_limits<double>::infinity();
 		for (int j=0; j<current; ++j) {
 			if (!filled[j]) {
-				if (table[current][j] < min) {
-					min = table[current][j];
+				if ((*table[current])[j] < min) {
+					min = (*table[current])[j];
 					spos = j;
 				}
 			}
 		}
 		for (int j=current+1; j<size; ++j) {
 			if (!filled[j]) {
-				if (table[current][j] < min) {
-					min = table[current][j];
+				if ((*table[current])[j] < min) {
+					min = (*table[current])[j];
 					spos = j;
 				}
 			}
@@ -42,7 +42,7 @@ double greedy(vector<int> &path, vector<vector<double>> &table)
 		total += min;
 		filled[spos] = true;
 	}
-	total += table[current][path[0]];
+	total += (*table[current])[path[0]];
 	// cout << "gree " << total << endl;
 	return total;
 }

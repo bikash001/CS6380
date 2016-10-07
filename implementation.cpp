@@ -4,6 +4,8 @@
 #include <climits>
 #include <queue>
 
+static void free_table(vector<vector<double>*> &table);
+
 struct prObj{
 	int index;
 	double val;
@@ -32,7 +34,7 @@ bool greaterThan(const prObj &lhs, const prObj &rhs)
 
 int g_min = INT_MAX;
 
-void sum(std::vector<int> v) {
+bool sum(std::vector<int> &v) {
 	int total = 0;
 	int size = v.size();
 	int arr[size];
@@ -45,18 +47,29 @@ void sum(std::vector<int> v) {
 	}
 	if (total != 4950) {
 		cout << "error "<< total << " size " << size << endl;
-		for (int i=0; i < size ; ++i) {
-			if (arr[i] == 0) 
-				cout << i+1 << " ";
-		}
-		cout << endl;
+		// for (int i=0; i < size ; ++i) {
+		// 	if (arr[i] == 0) 
+		// 		cout << i+1 << " ";
+		// }
+		// cout << endl;
+		// abort();
+		return true;
 	} else {
-		// cout << "success" << endl;
+		cout << "success" << endl;
+		return false;
 	}
 	// cout << total << endl;
 }
 
-void geneticAlgo(vector<vector<double>> &Table){
+void copy_pop(vector<vector<int>*> &dest, vector<vector<int>*> &src)
+{
+	int size = src.size();
+	for (int i=0; i<size; ++i) {
+		*(dest[i]) = *(src[i]);
+	}
+}
+
+void geneticAlgo(vector<vector<double> *> &Table){
 	/*
 		First randomly generate a sufficiently large population of tours.
 		Then call "selection" on this population to select tours for reproduction.
@@ -65,15 +78,17 @@ void geneticAlgo(vector<vector<double>> &Table){
 	*/
 	int n = Table.size();
 
-	vector<vector<int>> population;
 	int population_size = 200;
-	int parent_retain = 50;
+	int parent_retain = 100;
 	int i,j;
 	int k = 1, count = 0;
+	vector<vector<int> *> population;
+	vector<vector<int> *> tempPop;
 	for(i=0;i<population_size;i++){
-		vector<int> v(n);
-		greedy(v,Table);
+		vector<int> *v = new vector<int>(n);
+		greedy(*v,Table);
 		population.push_back(v);
+		tempPop.push_back(new vector<int>(n));
 	}
 	// cout << "---------------------------------------" << endl;
 	int csize = population_size/2;
@@ -86,20 +101,22 @@ void geneticAlgo(vector<vector<double>> &Table){
 		// for (int i=0; i<population.size(); ++i) {
 		// 	cout << evaluate(population[i], Table) << endl;
 		// }
-		vector<vector<int>> tempPop(population);
+		// vector<vector<int>> tempPop(population);
+		copy_pop(tempPop, population);
 		shuffle(population.begin(), population.end(), gen);
 		for(i=0; i<csize; i++){
-			crossOver(population[i], population[population_size - i - 1]);
+			crossOver(*population[i], *population[population_size - i - 1]);
 		}
+		mutation(population);
 		int max_index;
 		double val1, val2, min;
 		min = numeric_limits<double>::infinity();
 
-		for(i=0;i<population_size;i++){
-			val1 = evaluate(population[i], Table);
+		for(i=0; i<n; ++i){
+			val1 = evaluate(*population[i], Table);
 			child[i].index = i;
 			child[i].val = val1;
-			val2 = evaluate(tempPop[i], Table);
+			val2 = evaluate(*tempPop[i], Table);
 			par[i].index = i;
 			par[i].val = val2;
 			if (val1 > val2) {
@@ -108,9 +125,10 @@ void geneticAlgo(vector<vector<double>> &Table){
 			if(val1 < g_min){
 				g_min = val1;
 				max_index = i;
-				cout << val1 << endl;
+				cout << val1 << endl << flush;
 				// printPath(population[i]);
 			}
+			// cout << val1 << endl << flush;
 		}
 		sort(par.begin(), par.end(), lessThan);
 		// for (int i=1; i<par.size(); ++i) {
@@ -125,14 +143,25 @@ void geneticAlgo(vector<vector<double>> &Table){
 		// 	}
 		// }
 		for (int i=0; i<parent_retain; ++i) {
-			population[child[i].index] = tempPop[par[i].index];
+			*population[child[i].index] = *tempPop[par[i].index];
 		}
 		// count++;
+		// cout << "count " << count << endl;
 	}
+	free_pops(population);
+	free_pops(tempPop);
 	// cout << "final " << g_min << endl;
 }
 
-void readInput(char* filename, vector<vector<double>>& Table){
+static void free_table(vector<vector<double>*> &table)
+{
+	int size = table.size();
+	for (int i=0; i<size; ++i) {
+		delete table[i];
+	}
+}
+
+void readInput(char* filename, vector<vector<double> *>& Table){
 	FILE *fp;
 	fp = fopen(filename, "r");
 	char waste[100];
@@ -150,12 +179,12 @@ void readInput(char* filename, vector<vector<double>>& Table){
 	double f;
 	while(i<n)
 	{
-		vector<double> v;
+		vector<double> *v = new vector<double>();
 		j=0;
 		while(j<n)
 		{
-			fscanf(fp, "%lf", &f);	
-			v.push_back(f);
+			fscanf(fp, "%lf", &f);
+			(*v).push_back(f);
 			j++;
 		}
 		Table.push_back(v);
@@ -178,6 +207,14 @@ void printTable(vector<vector<double>>& Table){
 	cout << endl << flush;
 }
 
+void free_pops(vector<vector<int>*> &arr)
+{
+	int size = arr.size();
+	for (int i=0; i<size; ++i){
+		delete arr[i];
+	}
+}
+
 int main(int argc, char* argv[]){
 
 	if(argc<2)
@@ -185,7 +222,7 @@ int main(int argc, char* argv[]){
 		return -1;
 	}
 
-	vector<vector<double>> Table;
+	vector<vector<double> *> Table;
 	readInput(argv[1], Table);
 	// vector<int> b(100);
 	// double temp;
@@ -198,4 +235,5 @@ int main(int argc, char* argv[]){
 	// }
 	// cout << min << endl;
 	geneticAlgo(Table);
+	free_table(Table);
 }
